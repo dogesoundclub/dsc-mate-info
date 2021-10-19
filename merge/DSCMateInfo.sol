@@ -83,16 +83,24 @@ contract IKIP17Enumerable is IKIP17 {
     function tokenByIndex(uint256 index) public view returns (uint256);
 }
 
-interface IDSCMateName {
-    
-    event Set(uint256 indexed mateId, address indexed owner, string name);
-    
-    function tokenAmountForChanging() view external returns (uint256);
+interface IDSCNFTName {
+
+    event SetMixForChanging(uint256 _mix);
+    event SetMixForDeleting(uint256 _mix);
+
+    event Set(address indexed nft, uint256 indexed mateId, address indexed owner, string name);
+    event Remove(address indexed nft, uint256 indexed mateId, address indexed owner);
+
+    function V1() view external returns (address);
+    function mix() view external returns (IKIP17);
+    function mixForChanging() view external returns (uint256);
+    function mixForDeleting() view external returns (uint256);
+
+    function names(address nft, uint256 mateId) view external returns (string memory name);
+    function named(address nft, uint256 mateId) view external returns (bool);
     function exists(string calldata name) view external returns (bool);
-    function set(uint256 mateId, string calldata name) external;
-    function recordCount(uint256 mateId) view external returns (uint256);
-    function record(uint256 mateId, uint256 index) view external returns (address owner, string memory name, uint256 blockNumber);
-    function getName(uint256 mateId) view external returns (string memory name);
+    function set(address nft, uint256 mateId, string calldata name) external;
+    function remove(address nft, uint256 mateId) external;
 }
 
 interface IDSCMateFollowMe {
@@ -106,13 +114,13 @@ interface IDSCMateFollowMe {
 contract DSCMateInfo {
 
     IKIP17Enumerable private mate = IKIP17Enumerable(0xE47E90C58F8336A2f24Bcd9bCB530e2e02E1E8ae);
-    IDSCMateName private mateName = IDSCMateName(0x12C591fCd89B83704541B1Eac6b4aA18063A6954);
+    IDSCNFTName private mateName = IDSCNFTName(0xd095c72B42547c7097089E36908d60d13347823a);
     IDSCMateFollowMe private followMe = IDSCMateFollowMe(0x68d0EC90b70407089a419EE99C32a44c0f5Da775);
 
     function names(uint256 start, uint256 end) view public returns (string[] memory) {
         string[] memory _names = new string[](end - start + 1);
         for (uint256 id = start; id <= end; id += 1) {
-            _names[id - start] = mateName.getName(id);
+            _names[id - start] = mateName.names(address(mate), id);
         }
         return _names;
     }
